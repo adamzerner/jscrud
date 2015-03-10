@@ -35,7 +35,7 @@ $(document).ready(function() {
 
 	$('.container').on('click', '#edit', function(e) {
 		currIndex = $(e.target).data('i');
-    $editInput.val(todos[currIndex]);
+    $editInput.val(todos[currIndex].val);
     renderPage('edit');
 	});
 
@@ -66,10 +66,13 @@ $(document).ready(function() {
 
 	function renderList() {
 		// render DOM using todos
+    var checkedText;
 		$('.list ul').html('');
 		for (var i = 0, len = todos.length; i < len; i++) {
+      checkedText = todos[i].checked ? 'uncheck' : 'check';
 			$('.list ul').append([
-				'<li>' + todos[i] + 
+				'<li>' + todos[i].val + 
+          ' | ' +  '<a id="check" data-i="' + i + '">' + checkedText + '</a>' + 
 					' | ' +  '<a id="edit" data-i="' + i + '">edit</a>' + 
 					' | ' +  '<a id="delete" data-i="' + i + '">delete</a>' + 
 				'</li>'
@@ -81,7 +84,10 @@ $(document).ready(function() {
 	// FORMS
 	$createForm.on('submit', function(e) {
 		e.preventDefault();
-		todos.push($createInput.val());
+		todos.push({
+      val: $createInput.val(),
+      checked: false
+    });
 		$createInput.val('');
 		renderList();
 	});
@@ -89,8 +95,15 @@ $(document).ready(function() {
 	$editForm.on('submit', function(e) {
 		e.preventDefault();
 		var newVal = $editInput.val();
-    todos[currIndex] = newVal;
+    todos[currIndex].val = newVal;
 		$editInput.val('');
 		renderList();
 	});
+
+  // CHECKING
+  $('.container').on('click', '#check', function(e) {
+    var i = $(e.target).data('i');
+    todos[i].checked = !todos[i].checked;
+    renderList();
+  });
 });
