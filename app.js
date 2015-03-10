@@ -40,7 +40,9 @@ $(document).ready(function() {
 	});
 
   $('.container').on('click', '#delete', function(e) {
-    
+    var i = $(e.target).data('i');
+    todos.splice(i, 1);
+    renderList();
   });
 
   function getPage(page) {
