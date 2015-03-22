@@ -1,9 +1,10 @@
 $(document).ready(function() {
 
-var counter = 0;
+var count = 0;
 
 function Todo(title) {
-  this.id = counter++;
+  this.id = count;
+  count++;
   this.title = title;
   this.completed = false;
   this.dateAdded = Date.now();
@@ -38,18 +39,35 @@ var model = {
 
 var view = {
   init: function() {
+    this.render();
+    $('#createForm').on('submit', function(e) {
+      e.preventDefault();
+      $input = $('.form-control');
+      var newTitle = $input.val();
+      controller.addTodo(newTitle);
+      $input.val('');
+      $input.blur();
+    });
+    $(document).on('click', '.remove', function() {
+      var id = $(this).data('id');
+      controller.removeTodo(id);
+    });
+  },
+  render: function() {
     var $ul = $('.list-group'),
         todos = controller.getTodos(),
         $li;
+
+    $ul.html('');
     for (var i = 0, len = todos.length; i < len; i++) {
       $x = $('<span>&times;</span>')
       $x
-        .data('id', i);
+        .data('id', todos[i].id)
+        .addClass('remove');
 
       $checkbox = $('<input>');
       $checkbox
         .attr('type', 'checkbox');
-
 
       $li = $('<li></li>');
       $li
@@ -60,9 +78,6 @@ var view = {
       
       $ul.append($li);
     }
-  },
-  render: function() {
-
   }
 };
 
@@ -73,6 +88,14 @@ var controller = {
   },
   getTodos: function() {
     return model.getAll();
+  },
+  addTodo: function(title) {
+    model.add(title);
+    view.render();
+  },
+  removeTodo: function(id) {
+    model.remove(id);
+    view.render();
   }
 };
 
