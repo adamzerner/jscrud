@@ -32,8 +32,25 @@ var model = {
       }
     }
   },
+  check: function(id) {
+    var todos = JSON.parse(localStorage.todos);
+    todos[id].completed = !todos[id].completed;
+    localStorage.todos = JSON.stringify(todos);
+  },
   getAll: function() {
     return JSON.parse(localStorage.todos);
+  },
+  getRemaining: function() {
+    var todos = JSON.parse(localStorage.todos);
+    return todos.filter(function(todo) {
+      return !todo.completed;
+    });
+  },
+  getCompleted: function() {
+    var todos = JSON.parse(localStorage.todos);
+    return todos.filter(function(todo) {
+      return todo.completed;
+    });
   }
 };
 
@@ -52,10 +69,20 @@ var view = {
       var id = $(this).data('id');
       controller.removeTodo(id);
     });
+    $(document).on('click', 'input[type="checkbox"]', function() {
+      var id = $(this).data('id');
+      controller.checkTodo(id);
+    });
+    $('nav a').on('click', function(e) {
+      e.preventDefault();
+      var type = $(this).attr('id');
+      view.render(type);
+    });
   },
-  render: function() {
+  render: function(type) {
+    type = type || 'all';
+    var todos = controller.getTodos(type);
     var $ul = $('.list-group'),
-        todos = controller.getTodos(),
         $li;
 
     $ul.html('');
@@ -67,7 +94,9 @@ var view = {
 
       $checkbox = $('<input>');
       $checkbox
+        .data('id', todos[i].id)
         .attr('type', 'checkbox');
+      if (todos[i].completed) $checkbox.attr('checked', true);
 
       $li = $('<li></li>');
       $li
@@ -86,8 +115,10 @@ var controller = {
     model.init();
     view.init();
   },
-  getTodos: function() {
-    return model.getAll();
+  getTodos: function(type) {
+    if (type === 'all') return model.getAll();
+    else if (type === 'remaining') return model.getRemaining();
+    else if (type === 'completed') return model.getCompleted();
   },
   addTodo: function(title) {
     model.add(title);
@@ -96,6 +127,9 @@ var controller = {
   removeTodo: function(id) {
     model.remove(id);
     view.render();
+  },
+  checkTodo: function(id) {
+    model.check(id);
   }
 };
 
